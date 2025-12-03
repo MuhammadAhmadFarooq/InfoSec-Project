@@ -1,0 +1,59 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs
+logs/
+*.log
+combined.log
+error.log
+
+# MongoDB (if you ever dump)
+dump/
+*.dump
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build / Dist
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Security (never commit secrets!)
+config/secret.js
+config/keys.js
+
+# Dependency directories (if using pnpm or other)
+.pnp.*
+.pnpm-store/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# PM2 (if you use it for production)
+pm2.config.js
+ecosystem.config.js

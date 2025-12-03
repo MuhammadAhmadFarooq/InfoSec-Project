@@ -59,7 +59,7 @@ npm install
 Create `server/.env`:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/secure-messenger
+MONGODB_URI=Your MongoDB Atlas URL
 JWT_SECRET=your-secure-random-jwt-secret-here
 NODE_ENV=development
 ```
@@ -227,7 +227,7 @@ The system logs the following security events:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `PORT` | Server port | `5000` |
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/db` |
+| `MONGODB_URI` | MongoDB connection string | Your MongoDB Atlas URI |
 | `JWT_SECRET` | Secret for JWT signing | Random secure string |
 | `NODE_ENV` | Environment mode | `development` or `production` |
 

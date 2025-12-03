@@ -641,36 +641,49 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(152_70%_45%/0.05),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(160_50%_35%/0.03),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(hsl(152_70%_45%/0.02)_1px,transparent_1px),linear-gradient(90deg,hsl(152_70%_45%/0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      
       {/* Users List */}
-      <Card className="w-80 border-r">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="font-bold text-lg">Contacts</h2>
-          <div className="flex gap-2">
-            <Button size="icon" variant="ghost" onClick={() => setShowLogs(true)} title="Security Logs">
+      <Card className="w-80 border-r border-gray-700/50 glass rounded-none flex flex-col relative z-10">
+        <div className="p-4 border-b border-gray-700/50 flex justify-between items-center">
+          <h2 className="font-bold text-lg bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Contacts
+          </h2>
+          <div className="flex gap-1">
+            <Button size="icon" variant="ghost" onClick={() => setShowLogs(true)} title="Security Logs" className="hover:bg-gray-800 hover:text-green-400 transition-all duration-300">
               <AlertCircle className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={() => setShowSettings(true)} title="Settings">
+            <Button size="icon" variant="ghost" onClick={() => setShowSettings(true)} title="Settings" className="hover:bg-gray-800 hover:text-green-400 transition-all duration-300">
               <Settings className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={logout} title="Logout">
+            <Button size="icon" variant="ghost" onClick={logout} title="Logout" className="hover:bg-gray-800 hover:text-red-400 transition-all duration-300">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
-        <ScrollArea className="h-full">
-          {users.map(u => (
+        <ScrollArea className="flex-1">
+          {users.map((u, index) => (
             <div
               key={u.id}
               onClick={() => handleUserSelect(u)}
-              className={`p-4 hover:bg-muted cursor-pointer ${selectedUser?.id === u.id ? 'bg-muted' : ''}`}
+              className={`contact-item p-4 cursor-pointer animate-slide-in-left ${selectedUser?.id === u.id ? 'active' : ''}`}
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
               <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{u.username?.[0]?.toUpperCase() || '?'}</AvatarFallback></Avatar>
-                <div>
-                  <p className="font-medium">{u.username || 'Unknown'}</p>
+                <Avatar className="ring-2 ring-gray-700 ring-offset-2 ring-offset-gray-900">
+                  <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-600 text-gray-900 font-semibold">
+                    {u.username?.[0]?.toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-200 truncate">{u.username || 'Unknown'}</p>
                   {isKeyExchanged && selectedUser?.id === u.id && (
-                    <p className="text-xs text-green-600 flex items-center gap-1">
+                    <p className="text-xs text-green-500 flex items-center gap-1 animate-fade-in">
                       <Lock className="w-3 h-3" /> Secure Channel
                     </p>
                   )}
@@ -682,36 +695,59 @@ const Chat = () => {
       </Card>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative z-10">
         {selectedUser ? (
           <>
-            <div className="p-4 border-b flex items-center justify-between">
+            <div className="p-4 border-b border-gray-700/50 glass flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{selectedUser.username?.[0]?.toUpperCase() || '?'}</AvatarFallback></Avatar>
+                <Avatar className="ring-2 ring-green-500/30 ring-offset-2 ring-offset-gray-900">
+                  <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-600 text-gray-900 font-semibold">
+                    {selectedUser.username?.[0]?.toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="font-semibold">{selectedUser.username || 'Unknown'}</p>
-                  <p className="text-xs text-green-600">End-to-End Encrypted</p>
+                  <p className="font-semibold text-gray-100">{selectedUser.username || 'Unknown'}</p>
+                  <p className="text-xs text-green-500 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    End-to-End Encrypted
+                  </p>
                 </div>
               </div>
-              {isKeyExchanged && <Badge>Secure</Badge>}
+              {isKeyExchanged && (
+                <Badge className="bg-green-500/10 text-green-400 border border-green-500/30 security-badge">
+                  <Lock className="w-3 h-3 mr-1" />
+                  Secure
+                </Badge>
+              )}
             </div>
 
             <ScrollArea className="flex-1 p-6">
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-3xl mx-auto">
                 {messages.map((m, i) => (
-                  <div key={i} className={`flex flex-col ${m.isMine ? 'items-end' : 'items-start'}`}>
-                    <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${m.isMine ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <div 
+                    key={i} 
+                    className={`flex flex-col ${m.isMine ? 'items-end' : 'items-start'} animate-slide-up`}
+                    style={{ animationDelay: `${i * 0.02}s` }}
+                  >
+                    <div className={`max-w-xs lg:max-w-md px-4 py-3 ${
+                      m.isMine 
+                        ? 'message-sent text-gray-900 font-medium' 
+                        : 'message-received text-gray-100'
+                    }`}>
                       {m.fileId ? (
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => downloadAndDecryptFile(m.fileId)}>
+                        <div 
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" 
+                          onClick={() => downloadAndDecryptFile(m.fileId)}
+                        >
                           <FileText className="w-5 h-5" />
-                          <span>{m.text}</span>
-                          <Download className="w-4 h-4" />
+                          <span className="flex-1 truncate">{m.text}</span>
+                          <Download className="w-4 h-4 animate-bounce-subtle" />
                         </div>
                       ) : (
                         <p>{m.text}</p>
                       )}
                     </div>
-                    <span className={`text-xs text-muted-foreground mt-1 px-1 ${m.isMine ? 'text-right' : 'text-left'}`}>
+                    <span className={`text-xs text-gray-500 mt-1 px-1 ${m.isMine ? 'text-right' : 'text-left'}`}>
                       {formatMessageTime(m.timestamp)}
                     </span>
                   </div>
@@ -720,31 +756,53 @@ const Chat = () => {
               </div>
             </ScrollArea>
 
-            <div className="p-4 border-t">
-              <div className="flex gap-3">
+            <div className="p-4 border-t border-gray-700/50 glass">
+              <div className="flex gap-3 max-w-3xl mx-auto">
                 <Input
                   value={messageInput}
                   onChange={e => setMessageInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                  placeholder={isKeyExchanged ? "Type a message..." : "Establishing secure connection..."}
+                  placeholder={isKeyExchanged ? "Type a secure message..." : "Establishing secure connection..."}
                   disabled={!isKeyExchanged}
+                  className="bg-gray-800/50 border-gray-700 h-12 input-glow focus:border-green-500/50 transition-all duration-300 placeholder:text-gray-600"
                 />
                 <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
-                <Button size="icon" onClick={() => fileInputRef.current?.click()} disabled={!isKeyExchanged}>
-                  <Upload className="w-4 h-4" />
+                <Button 
+                  size="icon" 
+                  onClick={() => fileInputRef.current?.click()} 
+                  disabled={!isKeyExchanged}
+                  className="h-12 w-12 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-500/50 transition-all duration-300"
+                >
+                  <Upload className="w-5 h-5" />
                 </Button>
-                <Button onClick={sendMessage} disabled={!isKeyExchanged || !messageInput.trim()}>
-                  <Send className="w-4 h-4" />
+                <Button 
+                  onClick={sendMessage} 
+                  disabled={!isKeyExchanged || !messageInput.trim()}
+                  className="h-12 px-6 btn-primary-glow text-gray-900 font-semibold"
+                >
+                  <Send className="w-5 h-5" />
                 </Button>
               </div>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <Shield className="w-20 h-20 mx-auto text-primary mb-6" />
-              <h1 className="text-3xl font-bold">Secure E2EE Chat</h1>
-              <p className="text-muted-foreground mt-2">Select a user to start messaging</p>
+            <div className="text-center animate-scale-in">
+              <div className="w-32 h-32 mx-auto mb-8 rounded-3xl bg-gradient-to-br from-green-500/20 to-green-600/10 flex items-center justify-center animate-pulse-glow">
+                <Shield className="w-16 h-16 text-green-500 animate-float" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 via-green-500 to-green-400 bg-clip-text text-transparent mb-4">
+                Secure E2EE Chat
+              </h1>
+              <p className="text-gray-500 flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-green-500" />
+                Select a contact to start encrypted messaging
+              </p>
+              <div className="mt-8 flex justify-center gap-2">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
             </div>
           </div>
         )}
@@ -755,13 +813,15 @@ const Chat = () => {
 
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-gray-900 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
+            <DialogTitle className="flex items-center gap-2 text-gray-100">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <Settings className="w-4 h-4 text-green-500" />
+              </div>
               Security Settings
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-400">
               Manage your account security settings
             </DialogDescription>
           </DialogHeader>
@@ -769,23 +829,28 @@ const Chat = () => {
           <div className="space-y-6 py-4">
             {/* 2FA Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
                 <div className="flex items-center gap-3">
-                  <Smartphone className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <Smartphone className="w-5 h-5 text-green-500" />
+                  </div>
                   <div>
-                    <h4 className="font-medium">Two-Factor Authentication</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Add an extra layer of security to your account
+                    <h4 className="font-medium text-gray-100">Two-Factor Authentication</h4>
+                    <p className="text-xs text-gray-500">
+                      Add an extra layer of security
                     </p>
                   </div>
                 </div>
-                <Badge variant={twoFactorEnabled ? "default" : "secondary"}>
+                <Badge className={twoFactorEnabled 
+                  ? "bg-green-500/10 text-green-400 border border-green-500/30" 
+                  : "bg-gray-700 text-gray-400 border border-gray-600"
+                }>
                   {twoFactorEnabled ? "Enabled" : "Disabled"}
                 </Badge>
               </div>
 
               {!twoFactorEnabled && !setupData && (
-                <Button onClick={startSetup2FA} className="w-full">
+                <Button onClick={startSetup2FA} className="w-full h-11 btn-primary-glow text-gray-900 font-semibold">
                   <Shield className="w-4 h-4 mr-2" />
                   Enable 2FA
                 </Button>
@@ -793,10 +858,10 @@ const Chat = () => {
 
               {/* Setup Flow */}
               {setupData && !twoFactorEnabled && (
-                <div className="space-y-4 p-4 bg-muted rounded-lg">
+                <div className="space-y-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
                   <div className="text-center">
-                    <p className="text-sm font-medium mb-2">Scan this QR code with your authenticator app</p>
-                    <div className="bg-white p-4 rounded-lg inline-block">
+                    <p className="text-sm font-medium mb-3 text-gray-200">Scan with your authenticator app</p>
+                    <div className="bg-white p-4 rounded-xl inline-block shadow-lg">
                       <img 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(setupData.otpauthUri)}`}
                         alt="2FA QR Code"
@@ -806,26 +871,26 @@ const Chat = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground text-center">Or enter this secret manually:</p>
+                    <p className="text-xs text-gray-500 text-center">Or enter this secret manually:</p>
                     <div className="flex gap-2">
                       <Input 
                         value={setupData.secret} 
                         readOnly 
-                        className="font-mono text-xs"
+                        className="font-mono text-xs bg-gray-800 border-gray-700"
                       />
-                      <Button size="icon" variant="outline" onClick={copySecret}>
-                        {copiedSecret ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      <Button size="icon" variant="outline" onClick={copySecret} className="border-gray-700 hover:bg-gray-800 hover:border-green-500/50">
+                        {copiedSecret ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                       </Button>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm">Enter the 6-digit code from your app:</p>
+                    <p className="text-sm text-gray-300">Enter the 6-digit code:</p>
                     <Input
                       value={verifyCode}
-                      onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      onChange={(e) => setVerifyCode(e.target.value.replaceAll(/\D/g, '').slice(0, 6))}
                       placeholder="000000"
-                      className="text-center text-lg tracking-widest"
+                      className="text-center text-xl tracking-[0.3em] font-mono bg-gray-800 border-gray-700 h-12"
                       maxLength={6}
                     />
                   </div>
@@ -833,13 +898,13 @@ const Chat = () => {
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
-                      className="flex-1"
+                      className="flex-1 border-gray-700 hover:bg-gray-800"
                       onClick={() => { setSetupData(null); setVerifyCode(''); }}
                     >
                       Cancel
                     </Button>
                     <Button 
-                      className="flex-1"
+                      className="flex-1 btn-primary-glow text-gray-900 font-semibold"
                       onClick={verifyAndEnable2FA}
                       disabled={verifyCode.length !== 6}
                     >
@@ -851,19 +916,21 @@ const Chat = () => {
 
               {/* Show backup codes after enabling */}
               {backupCodes.length > 0 && (
-                <div className="space-y-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                  <p className="text-sm font-medium text-yellow-600">⚠️ Save your backup codes!</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="space-y-3 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
+                  <p className="text-sm font-medium text-yellow-500 flex items-center gap-2">
+                    <span className="text-lg">⚠️</span> Save your backup codes!
+                  </p>
+                  <p className="text-xs text-gray-500">
                     These codes can be used if you lose access to your authenticator. Each code can only be used once.
                   </p>
                   <div className="grid grid-cols-2 gap-2 font-mono text-sm">
                     {backupCodes.map((code, i) => (
-                      <div key={i} className="bg-background p-2 rounded text-center">{code}</div>
+                      <div key={code} className="bg-gray-800 p-2 rounded-lg text-center text-gray-300 border border-gray-700">{code}</div>
                     ))}
                   </div>
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full border-gray-700 hover:bg-gray-800 hover:border-green-500/50"
                     onClick={() => setBackupCodes([])}
                   >
                     I've saved my codes
@@ -873,24 +940,25 @@ const Chat = () => {
 
               {/* Disable 2FA */}
               {twoFactorEnabled && backupCodes.length === 0 && (
-                <div className="space-y-3 p-4 bg-muted rounded-lg">
-                  <p className="text-sm font-medium">Disable Two-Factor Authentication</p>
+                <div className="space-y-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
+                  <p className="text-sm font-medium text-gray-200">Disable Two-Factor Authentication</p>
                   <Input
                     type="password"
                     value={disablePassword}
                     onChange={(e) => setDisablePassword(e.target.value)}
                     placeholder="Your password"
+                    className="bg-gray-800 border-gray-700"
                   />
                   <Input
                     value={disableCode}
-                    onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) => setDisableCode(e.target.value.replaceAll(/\D/g, '').slice(0, 6))}
                     placeholder="2FA code"
-                    className="text-center tracking-widest"
+                    className="text-center tracking-[0.3em] font-mono bg-gray-800 border-gray-700"
                     maxLength={6}
                   />
                   <Button 
                     variant="destructive" 
-                    className="w-full"
+                    className="w-full bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20"
                     onClick={disable2FA}
                     disabled={!disablePassword || disableCode.length !== 6}
                   >
@@ -901,9 +969,9 @@ const Chat = () => {
             </div>
 
             {/* Account Info */}
-            <div className="pt-4 border-t">
-              <p className="text-xs text-muted-foreground">
-                Logged in as <span className="font-medium">{user?.username}</span>
+            <div className="pt-4 border-t border-gray-700">
+              <p className="text-xs text-gray-500">
+                Logged in as <span className="font-medium text-green-400">{user?.username}</span>
               </p>
             </div>
           </div>
@@ -927,20 +995,27 @@ const SecurityLogsSidebar = ({ onClose }) => {
   }, []);
 
   return (
-    <Card className="w-96 border-l h-screen flex flex-col">
-      <div className="p-4 border-b flex justify-between items-center">
-        <h3 className="font-bold">Security Logs</h3>
-        <Button size="icon" variant="ghost" onClick={onClose}>×</Button>
+    <Card className="w-96 border-l border-gray-800 h-screen flex flex-col bg-gray-900/95 backdrop-blur-xl">
+      <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+        <h3 className="font-bold text-gray-100 flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <Shield className="w-3 h-3 text-green-500" />
+          </div>
+          Security Logs
+        </h3>
+        <Button size="icon" variant="ghost" onClick={onClose} className="text-gray-400 hover:text-gray-100 hover:bg-gray-800">
+          ×
+        </Button>
       </div>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3 text-xs font-mono">
           {logs.map(log => (
-            <div key={log.id} className="p-3 bg-muted rounded">
-              <div className="flex justify-between">
-                <span className="font-bold text-green-400">{log.type.toUpperCase()}</span>
-                <span>{new Date(log.timestamp).toLocaleTimeString()}</span>
+            <div key={log.id} className="p-3 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-green-500/30 transition-all duration-300">
+              <div className="flex justify-between mb-1">
+                <span className="font-bold text-green-400 text-[10px] px-2 py-0.5 bg-green-500/10 rounded-full">{log.type.toUpperCase()}</span>
+                <span className="text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
               </div>
-              <p>{log.message}</p>
+              <p className="text-gray-300">{log.message}</p>
             </div>
           ))}
         </div>

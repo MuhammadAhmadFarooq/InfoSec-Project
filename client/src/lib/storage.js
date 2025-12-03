@@ -107,6 +107,17 @@ export async function getSecurityLogs(limit = 100) {
   });
 }
 
+export async function deleteSessionKey(partnerId) {
+  const db = await openDB();
+  const tx = db.transaction(KEYS_STORE, 'readwrite');
+  const store = tx.objectStore(KEYS_STORE);
+  return new Promise((resolve, reject) => {
+    const req = store.delete(`session_${partnerId}`);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
 export async function storeSequenceNumber(partnerId, seqNum) {
   const db = await openDB();
   const tx = db.transaction(KEYS_STORE, 'readwrite');

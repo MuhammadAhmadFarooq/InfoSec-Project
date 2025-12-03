@@ -30,6 +30,7 @@ import {
   getPrivateKey,
   getSessionKey,
   storeSessionKey,
+  deleteSessionKey,
   logSecurityEvent,
   getSequenceNumber,
   storeSequenceNumber,
@@ -199,7 +200,7 @@ const Chat = () => {
   const loadUsers = async () => {
     try {
       const fetched = await userAPI.getAllUsers();
-      setUsers(fetched.filter(u => u.id !== user.id));
+      setUsers(fetched.filter(u => u.id !== user.id && u.username));
     } catch (err) {
       toast.error('Failed to load users');
     }
@@ -207,6 +208,9 @@ const Chat = () => {
 
   const initiateKeyExchange = async (partner) => {
     try {
+      // Clear any stale session key before initiating new exchange
+      await deleteSessionKey(partner.id);
+      
       const myKeys = await getPrivateKey(user.id);
       const { publicKey: ephemPub, privateKey: ephemPriv, signingKey: ephemSigningKey } = await generateKeyPair('ECC');
       const ephemPubPem = await exportPublicKey(ephemPub);
@@ -222,7 +226,9 @@ const Chat = () => {
         console.warn('Signing failed, continuing without signature:', signErr);
       }
 
+      console.log('Initiating key exchange with:', partner.username);
       const { exchangeId } = await keyExchangeAPI.initiate(partner.id, ephemPubPem, signature);
+      console.log('Key exchange initiated, exchangeId:', exchangeId);
 
       toast.loading('Waiting for key exchange...', { id: 'keyex' });
 
@@ -323,18 +329,17 @@ const Chat = () => {
   const checkPendingKeyExchanges = async () => {
     try {
       const pending = await keyExchangeAPI.getPending();
+      console.log('Pending key exchanges:', pending.length);
       
       for (const exchange of pending) {
         if (exchange.status === 'pending') {
           // Convert ObjectId to string for consistent key storage
           const initiatorId = String(exchange.initiator._id);
+          console.log('Processing key exchange from:', exchange.initiator.username, 'initiatorId:', initiatorId);
           
-          // Check if we already have a session key for this user
-          // If so, skip responding to avoid key mismatch from race conditions
-          const existingKey = await getSessionKey(initiatorId);
-          if (existingKey) {
-            continue; // Already have session key, skip to avoid race condition
-          }
+          // Delete any existing stale session key - a new exchange means we need a fresh key
+          await deleteSessionKey(initiatorId);
+          console.log('Cleared old session key for', initiatorId);
           
           // Auto-respond to key exchange
           const myKeys = await getPrivateKey(user.id);
@@ -353,10 +358,12 @@ const Chat = () => {
           }
           
           await keyExchangeAPI.respond(exchange._id, ephemPubPem, signature);
+          console.log('Responded to key exchange:', exchange._id);
           
           // Derive shared secret using HKDF
           const initiatorEphemPub = await importPublicKey(exchange.initiatorEphemeralKey);
           const sharedKey = await deriveSharedSecret(ephemPriv, initiatorEphemPub);
+          console.log('Derived shared key for session with:', exchange.initiator.username);
           
           // Store with string ID for consistency
           await storeSessionKey(initiatorId, sharedKey);
@@ -377,6 +384,8 @@ const Chat = () => {
             type: 'key_exchange_response', 
             message: `Responded to key exchange from ${exchange.initiator.username}` 
           });
+          
+          toast.success(`Secure channel established with ${exchange.initiator.username}`);
         }
       }
     } catch (err) {
@@ -657,9 +666,9 @@ const Chat = () => {
               className={`p-4 hover:bg-muted cursor-pointer ${selectedUser?.id === u.id ? 'bg-muted' : ''}`}
             >
               <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{u.username[0].toUpperCase()}</AvatarFallback></Avatar>
+                <Avatar><AvatarFallback>{u.username?.[0]?.toUpperCase() || '?'}</AvatarFallback></Avatar>
                 <div>
-                  <p className="font-medium">{u.username}</p>
+                  <p className="font-medium">{u.username || 'Unknown'}</p>
                   {isKeyExchanged && selectedUser?.id === u.id && (
                     <p className="text-xs text-green-600 flex items-center gap-1">
                       <Lock className="w-3 h-3" /> Secure Channel
@@ -678,9 +687,9 @@ const Chat = () => {
           <>
             <div className="p-4 border-b flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Avatar><AvatarFallback>{selectedUser.username[0].toUpperCase()}</AvatarFallback></Avatar>
+                <Avatar><AvatarFallback>{selectedUser.username?.[0]?.toUpperCase() || '?'}</AvatarFallback></Avatar>
                 <div>
-                  <p className="font-semibold">{selectedUser.username}</p>
+                  <p className="font-semibold">{selectedUser.username || 'Unknown'}</p>
                   <p className="text-xs text-green-600">End-to-End Encrypted</p>
                 </div>
               </div>
